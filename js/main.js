@@ -10,7 +10,6 @@ $(document).ready(function() {
 	var humanIcon = "";
 	var compIcon = "";
 	var closeTag = "</a>";
-	var currentPlayer = "";
 	var running = false;
 	var humanPlaying = true;
 	var gameCell = $(".square-grid__cell");
@@ -118,6 +117,10 @@ $(document).ready(function() {
 	function clearBoard() {
 		writeHTML(gameCell)("");
 		allCells = {};
+		humanPlayer = "";
+		humanIcon = "";
+		compPlayer = "";
+		compIcon = "";
 	}
 
 	/*
@@ -133,8 +136,8 @@ $(document).ready(function() {
 			writeHTML(titleTag)(indicator + endMessage);
 			$("#resetGame").click(function() {
 				clearBoard();
-				initialise();
 				humanPlaying = true;
+				initialise();
 			});
 		}
 	}
