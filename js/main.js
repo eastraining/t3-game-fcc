@@ -16,9 +16,7 @@ $(document).ready(function() {
 	var gameCell = $(".square-grid__cell");
 	var numCells = 9;
 	var allCells = {};
-	var allRows = [["0", "1", "2"], ["3", "4", "5"], ["6", "7", "8"]];
-	var allColumns = [["0", "3", "6"], ["1", "4", "7"], ["2", "5", "8"]];
-	var allDiagonals = [["0", "4", "8"], ["2", "4", "6"], ["0", "4", "8"]]; // extra diagonal for ease
+	var allWins = [["0", "1", "2"], ["3", "4", "5"], ["6", "7", "8"], ["0", "3", "6"], ["1", "4", "7"], ["2", "5", "8"], ["0", "4", "8"], ["2", "4", "6"]];
 	var endMessage = " has won! <a id='resetGame'>Play a new Game!</a>";
 
 	// function for reading text content of html
@@ -47,7 +45,6 @@ $(document).ready(function() {
 				compPlayer = "O";
 				humanIcon = tagRed + humanPlayer + closeTag;
 				compIcon = tagBlue + compPlayer + closeTag;
-
 			}
 			else if (humanPlayer == "O") {
 				compPlayer = "X";
@@ -62,7 +59,8 @@ $(document).ready(function() {
 					if (humanPlaying == true) {
 						writeHTML(that)(humanIcon);
 						humanPlaying = false;
-						resetGame(isGameComplete());
+						resetGame(isGameComplete(allCells));
+						computerTurn();
 					}
 				}
 			});
@@ -76,32 +74,32 @@ $(document).ready(function() {
 	 *	Returns "Nobody" if draw.
 	 *	Else returns "N".
 	 */
-	function isGameComplete() {
+	function isGameComplete(board) {
 		// determine state of board
 		var filledCells = 0;
-		for (var i = 0; i < numCells; i++) {
-			var temp = "cell" + i.toString();
-			var tempStr = readText($("#" + temp));
-			if (tempStr != "") {
-				filledCells++;
+		if (board == allCells) {
+			for (var i = 0; i < numCells; i++) {
+				var temp = "cell" + i.toString();
+				var tempStr = readText($("#" + temp));
+				if (tempStr != "") {
+					filledCells++;
+				}
+				allCells[i] = tempStr;
 			}
-			allCells[i] = tempStr;
 		}
+		else {
+			for (var i = 0; i < numCells; i++) {
+				if (board[i.toString()] != "") {
+					filledCells++;
+				}
+			}
+		}
+		
 		// determine if any win condition is met
-		for (var j = 0; j < allRows.length; j++) {
-			if (allCells[allRows[j][0]] != "") {
-				if (allCells[allRows[j][0]] == allCells[allRows[j][1]] && allCells[allRows[j][1]] == allCells[allRows[j][2]]) {
-					return allCells[allRows[j][0]];
-				}
-			}
-			if (allCells[allColumns[j][0]] != "") {
-				if (allCells[allColumns[j][0]] == allCells[allColumns[j][1]] && allCells[allColumns[j][1]] == allCells[allColumns[j][2]]) {
-					return allCells[allColumns[j][0]];
-				}
-			}
-			if (allCells[allDiagonals[j][0]] != "") {
-				if (allCells[allDiagonals[j][0]] == allCells[allDiagonals[j][1]] && allCells[allDiagonals[j][1]] == allCells[allDiagonals[j][2]]) {
-					return allCells[allDiagonals[j][0]];
+		for (var j = 0; j < allWins.length; j++) {
+			if (board[allWins[j][0]] != "") {
+				if (board[allWins[j][0]] == board[allWins[j][1]] && board[allWins[j][1]] == board[allWins[j][2]]) {
+					return board[allWins[j][0]];
 				}
 			}
 		}
@@ -141,16 +139,45 @@ $(document).ready(function() {
 		}
 	}
 
-	// start game
-	initialise();
+	/* ON HOLD: until I bother to make the minimax algorithm
+	// scorer(): returns an integer score based on board ending
+	function scorer(indicator) {
+		if (indicator == humanPlayer) {
+			return -1;
+		}
+		else if (indicator == compPlayer) {
+			return 1;
+		}
+		else if (indicator == "Nobody") {
+			return 0;
+		}
+		else {
+			return null;
+		}
+	}
+	*/
 
 	/*
 	 * computerTurn():
-	 * Evalutes possible boards using minimax algorithm.
-	 * Makes a move.
+	 * TODO: Evalutes possible boards using minimax algorithm.
+	 * Makes a (currently random) move.
 	 * Invokes resetGame(isGameComplete()) at the end of turn.
 	 */
 	function computerTurn() {
-		
+		var tempBoard = $.extend({}, allCells);
+		var allTempMoves = [];
+		for (var i = 0; i < numCells; i++) {
+			if (tempBoard[i.toString()] == "") {
+				allTempMoves.push(i.toString());
+			}
+		}
+
+		var compMove = "cell" + allTempMoves[Math.floor(Math.random() * allTempMoves.length)];
+		writeHTML($("#" + compMove))(compIcon);
+		resetGame(isGameComplete(allCells));
+		humanPlaying = true;
 	}
+
+	// start game
+	initialise();
 });
